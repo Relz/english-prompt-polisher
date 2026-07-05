@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { suite, test } from 'node:test';
 
 import { buildNotionProposalPayload } from '../../src/notion/notion-proposal-payload.ts';
+import { formatNotionProposalTitle } from '../../src/notion/notion-proposal-properties.ts';
 import type { NotionDatabaseProperties, NotionPagePayload } from '../../src/notion/notion-types.ts';
 import type { ProposalRecord } from '../../src/proposal/proposal-types.ts';
 
@@ -46,7 +47,7 @@ void suite('buildNotionProposalPayload', () => {
 			new Set(['Prompt', 'Detected Language', 'Conversation ID', 'Created At']),
 		);
 		assert.deepEqual(payload.properties.Prompt, {
-			title: [{ type: 'text', text: { content: 'Prompt polish proposal - 2026-06-13T12:00:00.000Z' } }],
+			title: [{ type: 'text', text: { content: 'Create a CLI.' } }],
 		});
 		assert.deepEqual(payload.properties['Detected Language'], {
 			rich_text: [{ type: 'text', text: { content: 'Russian' } }],
@@ -66,5 +67,66 @@ void suite('buildNotionProposalPayload', () => {
 			type: 'paragraph',
 			paragraph: { rich_text: [{ type: 'text', text: { content: 'Prompt is written in Russian.' } }] },
 		});
+	});
+
+	void test('formats title from proposed prompt preview', () => {
+		// Arrange
+
+		const titleRecord: ProposalRecord = {
+			...record,
+			proposedPrompt: '  Create\n\t a CLI tool.  ',
+		};
+
+		// Act
+
+		const title: string = formatNotionProposalTitle(titleRecord);
+
+		// Assert
+
+		assert.equal(title, 'Create a CLI tool.');
+	});
+
+	void test('truncates long proposed prompt previews', () => {
+		// Arrange
+
+		const titleRecord: ProposalRecord = {
+			...record,
+			proposedPrompt: 'Create '.repeat(30).trim(),
+		};
+
+		// Act
+
+		const title: string = formatNotionProposalTitle(titleRecord);
+
+		// Assert
+
+		assert.equal(title.length, 120);
+		assert.match(title, /^Create Create/);
+		assert.equal(title.endsWith('...'), true);
+	});
+
+	void test('falls back when proposed prompt title is empty', () => {
+		// Arrange
+
+		const originalFallbackRecord: ProposalRecord = {
+			...record,
+			originalPrompt: '  Original\n\tprompt  ',
+			proposedPrompt: ' \n\t ',
+		};
+		const genericFallbackRecord: ProposalRecord = {
+			...record,
+			originalPrompt: ' ',
+			proposedPrompt: '',
+		};
+
+		// Act
+
+		const originalFallbackTitle: string = formatNotionProposalTitle(originalFallbackRecord);
+		const genericFallbackTitle: string = formatNotionProposalTitle(genericFallbackRecord);
+
+		// Assert
+
+		assert.equal(originalFallbackTitle, 'Original prompt');
+		assert.equal(genericFallbackTitle, 'Prompt polish proposal');
 	});
 });

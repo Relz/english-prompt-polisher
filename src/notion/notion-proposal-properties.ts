@@ -4,6 +4,8 @@ import { richText } from './notion-blocks.ts';
 import { hasNotionPropertyType, notionTitlePropertyName } from './notion-proposal-schema.ts';
 import type { NotionDatabaseProperties } from './notion-types.ts';
 
+const NOTION_PROPOSAL_TITLE_MAX_LENGTH: number = 120;
+
 function addProperty(
 	properties: Record<string, unknown>,
 	databaseProperties: NotionDatabaseProperties,
@@ -16,6 +18,21 @@ function addProperty(
 	}
 }
 
+function previewTitle(value: string): string | undefined {
+	const preview: string = value.trim().replace(/\s+/g, ' ');
+	if (!preview) {
+		return;
+	}
+	if (preview.length <= NOTION_PROPOSAL_TITLE_MAX_LENGTH) {
+		return preview;
+	}
+	return `${preview.slice(0, NOTION_PROPOSAL_TITLE_MAX_LENGTH - 3).trimEnd()}...`;
+}
+
+export function formatNotionProposalTitle(record: ProposalRecord): string {
+	return previewTitle(record.proposedPrompt) ?? previewTitle(record.originalPrompt) ?? 'Prompt polish proposal';
+}
+
 export function buildNotionProposalProperties(
 	record: ProposalRecord,
 	databaseProperties: NotionDatabaseProperties,
@@ -24,7 +41,7 @@ export function buildNotionProposalProperties(
 	const titleProperty: string = notionTitlePropertyName(databaseProperties, configuredTitleProperty);
 	const properties: Record<string, unknown> = {};
 	properties[titleProperty] = {
-		title: richText(`Prompt polish proposal - ${record.createdAt}`),
+		title: richText(formatNotionProposalTitle(record)),
 	};
 	addProperty(
 		properties,
