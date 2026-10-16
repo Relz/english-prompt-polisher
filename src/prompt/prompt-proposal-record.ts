@@ -3,10 +3,7 @@ import type { ProposalRecord } from '../proposal/proposal-types.ts';
 import type { ChatMessageInput } from '../shared/chat.ts';
 
 import type { PromptProposalCandidate } from './prompt-proposal-candidate.ts';
-
-export function shouldCreatePromptProposalRecord(result: PolisherResult, originalPrompt: string): boolean {
-	return result.needsProposal && result.proposedPrompt.trim().length > 0 && result.proposedPrompt !== originalPrompt;
-}
+import { hasUsablePromptProposal } from './prompt-proposal-result.ts';
 
 export function createPromptProposalRecord(
 	input: ChatMessageInput,
@@ -14,7 +11,7 @@ export function createPromptProposalRecord(
 	result: PolisherResult,
 	createdAt: string,
 ): ProposalRecord | undefined {
-	if (!shouldCreatePromptProposalRecord(result, candidate.originalPrompt)) {
+	if (!hasUsablePromptProposal(result, candidate.originalPrompt)) {
 		return;
 	}
 

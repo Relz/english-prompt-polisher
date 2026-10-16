@@ -7,7 +7,8 @@ import { noopLog, type WriteLog } from '../shared/log.ts';
 import type { Options } from '../shared/options.ts';
 
 import { createPromptProposalCandidate } from './prompt-proposal-candidate.ts';
-import { createPromptProposalRecord, shouldCreatePromptProposalRecord } from './prompt-proposal-record.ts';
+import { createPromptProposalRecord } from './prompt-proposal-record.ts';
+import { hasUsablePromptProposal } from './prompt-proposal-result.ts';
 
 type CheckPrompt = (input: ChatMessageInput, options: Options, prompt: string) => Promise<PolisherResult>;
 
@@ -66,7 +67,7 @@ export async function handlePromptProposal(
 	}
 
 	const result: PolisherResult = await runCheckPrompt(input, options, candidate.originalPrompt);
-	if (!shouldCreatePromptProposalRecord(result, candidate.originalPrompt)) {
+	if (!hasUsablePromptProposal(result, candidate.originalPrompt)) {
 		return { status: 'skipped' };
 	}
 

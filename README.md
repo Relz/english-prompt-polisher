@@ -84,7 +84,7 @@ Start with the integration example above, replace `AgentMessageEvent` with your 
 
 ## Rewrite Mode
 
-Use `mode: 'rewrite'` when your adapter should replace the prompt with the proposed English prompt. Rewrite mode still writes proposal outputs, so proposals continue to be recorded in the configured Markdown file and, when enabled, in Notion.
+With `handlePromptProposal`, use `mode: 'rewrite'` to invoke your adapter's `rewritePrompt` callback. This flow still writes proposals to the configured Markdown file and, when enabled, Notion.
 
 ```ts
 const options: Options = {
@@ -107,11 +107,29 @@ await handlePromptProposal(input, output, options, {
 
 The library decides when a rewrite is needed and passes the full proposal record to `rewritePrompt`. The concrete adapter still owns the agent-specific mutation because each agent exposes different hook and message APIs. Notion is optional and uses the same output flow as file proposals.
 
+### Rewrite Without Proposal Outputs
+
+Use `handlePromptRewrite` to check a prompt and return a rewrite decision without modifying messages or writing Markdown or Notion outputs. It does not require `mode: 'rewrite'`; your adapter applies the returned prompt.
+
+```ts
+import { handlePromptRewrite } from 'english-prompt-polisher';
+
+const result = await handlePromptRewrite(input, prompt, options, {
+	checkPrompt,
+});
+
+if (result.status === 'rewritten') {
+	await event.rewritePrompt(result.proposedPrompt);
+}
+```
+
+Returns `{ status: 'skipped' }` when the prompt is ineligible or no usable change is proposed.
+
 ## Options
 
 | Option                 | Default                        | Description                                           |
 | ---------------------- | ------------------------------ | ----------------------------------------------------- |
-| `mode`                 | `proposal`                     | Use `rewrite` to call the adapter rewrite callback.   |
+| `mode`                 | `proposal`                     | With `handlePromptProposal`, use `rewrite` to call the adapter rewrite callback. |
 | `outputFile`           | `~/english-prompt-polisher.md` | Markdown file that receives proposals.                |
 | `maxChars`             | unset                          | Skip prompts exceeding this many Unicode code points. |
 | `includeOriginal`      | `true`                         | Include the original prompt in the Markdown output.   |
@@ -126,6 +144,7 @@ The library decides when a rewrite is needed and passes the full proposal record
 ## Public API
 
 - `handlePromptProposal`: high-level orchestration for extracting, checking, recording, and writing a proposal.
+- `handlePromptRewrite`: checks a supplied prompt and returns a rewrite decision without modifying messages or writing proposal outputs.
 - `buildCheckerPrompt`: builds the checker prompt your integration can send to its model.
 - `parseCheckerResult`: parses model output into a `PolisherResult`.
 - `formatProposalMarkdown`: renders a proposal record as Markdown.
@@ -182,8 +201,8 @@ Create a CLI tool.
 
 ## Notes
 
-- The original user prompt is not modified or blocked unless `mode: 'rewrite'` is configured and the adapter-provided `rewritePrompt` callback performs the mutation.
-- The proposal is written as supporting output for the user to review.
+- Prompt mutation is the adapter's responsibility, through the `rewritePrompt` callback or by applying a `handlePromptRewrite` result.
+- `handlePromptProposal` writes supporting proposal outputs; `handlePromptRewrite` does not.
 - Checker failures are propagated to your integration.
 - Default proposal output sinks do not throw on write failure. They return `{ status: 'failed' }` entries in `PromptProposalResult.output` and log warnings when a logger is provided.
 - If you inject a custom `writeProposal` dependency and it rejects, that error is propagated.

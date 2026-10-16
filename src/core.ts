@@ -13,7 +13,14 @@ export {
 	type PromptProposalRewriteOptions,
 	type PromptProposalResult,
 } from './prompt/prompt-proposal.ts';
-export { createPromptProposalRecord, shouldCreatePromptProposalRecord } from './prompt/prompt-proposal-record.ts';
+export { createPromptProposalRecord } from './prompt/prompt-proposal-record.ts';
+export { hasUsablePromptProposal } from './prompt/prompt-proposal-result.ts';
+export { shouldCheckPromptForRewrite } from './prompt/prompt-rewrite-policy.ts';
+export {
+	handlePromptRewrite,
+	type PromptRewriteDependencies,
+	type PromptRewriteResult,
+} from './prompt/prompt-rewrite.ts';
 export { textFromParts } from './prompt/prompt-text.ts';
 export { formatProposalMarkdown } from './proposal/proposal-markdown.ts';
 export { writeProposal, type ProposalOutputResult, type ProposalOutputSinkResult } from './proposal/proposal-output.ts';
