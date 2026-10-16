@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { suite, test } from 'node:test';
 
-import { textFromParts, truncatePrompt } from '../../src/prompt/prompt-text.ts';
+import { textFromParts } from '../../src/prompt/prompt-text.ts';
 import type { ChatParts } from '../../src/shared/chat.ts';
 import { textPart } from '../fixtures.ts';
 
@@ -16,10 +16,6 @@ function filePart(overrides: Partial<FileChatPart> = {}): FileChatPart {
 		...overrides,
 	};
 	return part;
-}
-
-function retainedPrefix(result: string, maxChars: number): string {
-	return Array.from(result).slice(0, maxChars).join('');
 }
 
 void suite('prompt text helpers', () => {
@@ -108,75 +104,5 @@ void suite('prompt text helpers', () => {
 		// Assert
 
 		assert.equal(text, 'Visible');
-	});
-
-	void test('truncatePrompt returns prompts shorter than the limit unchanged', () => {
-		// Arrange
-
-		const prompt: string = 'short';
-
-		// Act
-
-		const result: string = truncatePrompt(prompt, 10);
-
-		// Assert
-
-		assert.equal(result, 'short');
-	});
-
-	void test('truncatePrompt appends the truncation marker when needed', () => {
-		// Arrange
-
-		const prompt: string = 'long prompt';
-
-		// Act
-
-		const result: string = truncatePrompt(prompt, 4);
-
-		// Assert
-
-		assert.equal(retainedPrefix(result, 4), 'long');
-		assert.match(result.slice(4), /truncated/i);
-		assert.match(result.slice(4), /\b4\b/);
-	});
-
-	void test('truncatePrompt preserves retained prefix formatting before the truncation marker', () => {
-		// Act
-
-		const result: string = truncatePrompt('Line 1\n  Line 2\nLine 3', 15);
-
-		// Assert
-
-		assert.equal(retainedPrefix(result, 15), 'Line 1\n  Line 2');
-	});
-
-	void test('truncatePrompt does not truncate at the exact length boundary', () => {
-		// Act
-
-		const result: string = truncatePrompt('1234', 4);
-
-		// Assert
-
-		assert.equal(result, '1234');
-	});
-
-	void test('truncatePrompt does not truncate at the Unicode code point boundary', () => {
-		// Act
-
-		const result: string = truncatePrompt('A😊', 2);
-
-		// Assert
-
-		assert.equal(result, 'A😊');
-	});
-
-	void test('truncatePrompt truncates by Unicode code point without splitting surrogate pairs', () => {
-		// Act
-
-		const result: string = truncatePrompt('A😊BC', 2);
-
-		// Assert
-
-		assert.equal(retainedPrefix(result, 2), 'A😊');
 	});
 });

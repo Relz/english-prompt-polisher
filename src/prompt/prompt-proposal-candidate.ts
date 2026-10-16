@@ -1,8 +1,8 @@
 import type { ChatMessageOutput } from '../shared/chat.ts';
 import type { Options } from '../shared/options.ts';
 
-import { maxPromptChars, shouldCheckPromptForProposal } from './prompt-proposal-policy.ts';
-import { textFromParts, truncatePrompt } from './prompt-text.ts';
+import { shouldCheckPromptForProposal } from './prompt-proposal-policy.ts';
+import { textFromParts } from './prompt-text.ts';
 
 export type PromptProposalCandidate = {
 	originalPrompt: string;
@@ -10,12 +10,12 @@ export type PromptProposalCandidate = {
 
 export function createPromptProposalCandidate(
 	output: ChatMessageOutput,
-	options: Options,
+	options: Options = {},
 ): PromptProposalCandidate | undefined {
 	const promptText: string = textFromParts(output.parts);
-	if (!shouldCheckPromptForProposal(promptText)) {
+	if (!shouldCheckPromptForProposal(promptText, options)) {
 		return;
 	}
 
-	return { originalPrompt: truncatePrompt(promptText, maxPromptChars(options)) };
+	return { originalPrompt: promptText };
 }

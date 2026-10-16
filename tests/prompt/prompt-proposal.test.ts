@@ -161,6 +161,31 @@ void suite('handlePromptProposal', { concurrency: false }, () => {
 		assert.equal(nowCalls, 0);
 	});
 
+	void test('skips oversized prompts without checking, rewriting, or writing proposals', async () => {
+		// Arrange
+
+		const input: ChatMessageInput = chatInput();
+		const output: ChatMessageOutput = chatOutput([textPart('Corrige esto')]);
+		const dependencies: PromptProposalRewriteDependencies = {
+			checkPrompt: (): Promise<PolisherResult> => assert.fail('Unexpected prompt check'),
+			rewritePrompt: (): Promise<void> => assert.fail('Unexpected rewrite'),
+			writeProposal: (): Promise<ProposalOutputResult> => assert.fail('Unexpected proposal write'),
+		};
+
+		// Act
+
+		const result: PromptProposalResult = await handlePromptProposal(
+			input,
+			output,
+			{ mode: 'rewrite', maxChars: 10 },
+			dependencies,
+		);
+
+		// Assert
+
+		assert.deepEqual(result, { status: 'skipped' });
+	});
+
 	void test('checks the extracted prompt with the provided input and options', async () => {
 		// Arrange
 

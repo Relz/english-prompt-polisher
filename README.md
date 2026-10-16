@@ -109,17 +109,19 @@ The library decides when a rewrite is needed and passes the full proposal record
 
 ## Options
 
-| Option                 | Default                        | Description                                         |
-| ---------------------- | ------------------------------ | --------------------------------------------------- |
-| `mode`                 | `proposal`                     | Use `rewrite` to call the adapter rewrite callback. |
-| `outputFile`           | `~/english-prompt-polisher.md` | Markdown file that receives proposals.              |
-| `maxChars`             | `4000`                         | Maximum prompt characters sent to the checker.      |
-| `includeOriginal`      | `true`                         | Include the original prompt in the Markdown output. |
-| `checker.model`        | unset                          | Optional model hint for the injected checker.       |
-| `notion.enabled`       | `false`                        | Create Notion database entries.                     |
-| `notion.token`         | unset                          | Direct Notion integration token.                    |
-| `notion.databaseId`    | unset                          | Direct Notion database ID.                          |
-| `notion.titleProperty` | auto-detect                    | Notion title property name.                         |
+| Option                 | Default                        | Description                                           |
+| ---------------------- | ------------------------------ | ----------------------------------------------------- |
+| `mode`                 | `proposal`                     | Use `rewrite` to call the adapter rewrite callback.   |
+| `outputFile`           | `~/english-prompt-polisher.md` | Markdown file that receives proposals.                |
+| `maxChars`             | unset                          | Skip prompts exceeding this many Unicode code points. |
+| `includeOriginal`      | `true`                         | Include the original prompt in the Markdown output.   |
+| `checker.model`        | unset                          | Optional model hint for the injected checker.         |
+| `notion.enabled`       | `false`                        | Create Notion database entries.                       |
+| `notion.token`         | unset                          | Direct Notion integration token.                      |
+| `notion.databaseId`    | unset                          | Direct Notion database ID.                            |
+| `notion.titleProperty` | auto-detect                    | Notion title property name.                           |
+
+`maxChars` accepts only positive safe integers. If omitted or invalid, no length limit is applied unless a valid `maxChars` default is supplied to `normalizeOptions`.
 
 ## Public API
 

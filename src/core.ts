@@ -14,7 +14,7 @@ export {
 	type PromptProposalResult,
 } from './prompt/prompt-proposal.ts';
 export { createPromptProposalRecord, shouldCreatePromptProposalRecord } from './prompt/prompt-proposal-record.ts';
-export { textFromParts, truncatePrompt } from './prompt/prompt-text.ts';
+export { textFromParts } from './prompt/prompt-text.ts';
 export { formatProposalMarkdown } from './proposal/proposal-markdown.ts';
 export { writeProposal, type ProposalOutputResult, type ProposalOutputSinkResult } from './proposal/proposal-output.ts';
 export { type ProposalRecord } from './proposal/proposal-types.ts';
